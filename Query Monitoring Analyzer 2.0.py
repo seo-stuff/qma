@@ -9,6 +9,19 @@ def process_brands(query, brand_variations):
             return 'Да'
     return 'Нет'
 
+def classify_commercialization(query):
+    information_keywords = ["где", "зачем", "как", "какой", "какая", "какие", "какое", "каков", "когда", "который", "которая", "которое", "кто", "куда", "откуда", "почему", "сколько", "чей", "что"]
+    commercial_keywords = ["цена", "цены", "цене", "купить", "стоимость", "москва", "москве", "москвы"]
+    
+    words = query.split()
+    for word in words:
+        if word.lower() in information_keywords:
+            return "Информационный"
+        elif word.lower() in commercial_keywords:
+            return "Коммерческий"
+    
+    return "Неизвестно"
+
 # Вариации брендовых запросов
 brand_variations_input = input("Введите брендовые запросы, например: Yandex, Яндекс, ya (или Enter для пропуска): ").strip()
 brand_variations = [brand.strip() for brand in brand_variations_input.split(',')] if brand_variations_input else []
@@ -56,9 +69,12 @@ df['Ср. число кликов'] = df[clicks_columns].mean(axis=1).round(0)
 # Считаем суммарное число кликов за 14 дней
 df['Сум. кликов за 14 дн.'] = df[clicks_columns].sum(axis=1)
 
+# Добавляем столбец "Коммерциализация"
+df['Коммерциализация'] = df['Поисковые запросы'].apply(lambda x: classify_commercialization(x))
+
 # Фильтрация и сортировка данных
 result_df = df.loc[df['Сум. частотность за 14 дн'] >= min_total_frequency].sort_values(by='Сум. частотность за 14 дн', ascending=False)
-result_df = result_df[['Поисковые запросы', 'Ср. позиция', 'Ср. дн. частотность', 'Сум. частотность за 14 дн', 'Ср. число кликов', 'Сум. кликов за 14 дн.', 'Охват', 'Бренд']]
+result_df = result_df[['Поисковые запросы', 'Ср. позиция', 'Ср. дн. частотность', 'Сум. частотность за 14 дн', 'Ср. число кликов', 'Сум. кликов за 14 дн.', 'Охват', 'Бренд', 'Коммерциализация']]
 
 # Получаем название домена и текущую дату
 domain_name = input_file.split('.')[0]
@@ -87,7 +103,7 @@ with pd.ExcelWriter(output_file_name, engine='openpyxl') as writer:
 
     # Настройка ширины колонок
     writer.sheets['Семантическое ядро'].column_dimensions['A'].width = 50
-    for col in ['B', 'C', 'D', 'E', 'F', 'G', 'H']:
+    for col in ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']:
         writer.sheets['Семантическое ядро'].column_dimensions[col].width = 25
 
     # Создание нового листа для статистики слов
@@ -106,7 +122,8 @@ with pd.ExcelWriter(output_file_name, engine='openpyxl') as writer:
         "'Охват': Отношение показов к спросу в процентах (округлено до десятых)",
         "'Бренд': Запросы с вхождением бренда",
         "'Ср. число кликов': Среднее число кликов в день",
-        "'Сум. кликов за 14 дн.': Суммарное число кликов за 14 дней"
+        "'Сум. кликов за 14 дн.': Суммарное число кликов за 14 дней",
+        "'Коммерциализация': Тип запроса (Информационный, Коммерческий, Неизвестно)"
     ]
     df_explanations = pd.DataFrame(explanations, columns=['Пояснение'])
     df_explanations.to_excel(writer, index=False, sheet_name='Пояснения')
