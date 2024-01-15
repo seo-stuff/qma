@@ -49,9 +49,16 @@ df['Охват'] = round((df[shows_columns].sum(axis=1) / df[demand_columns].sum
 # Добавляем столбец "Ср. дн. частотность"
 df['Ср. дн. частотность'] = df[demand_columns].mean(axis=1).round(0)
 
+# Считаем среднее число кликов в день
+clicks_columns = [col for col in df.columns if col.endswith('_clicks')]
+df['Ср. число кликов'] = df[clicks_columns].mean(axis=1).round(0)
+
+# Считаем суммарное число кликов за 14 дней
+df['Сум. кликов за 14 дн.'] = df[clicks_columns].sum(axis=1)
+
 # Фильтрация и сортировка данных
 result_df = df.loc[df['Сум. частотность за 14 дн'] >= min_total_frequency].sort_values(by='Сум. частотность за 14 дн', ascending=False)
-result_df = result_df[['Поисковые запросы', 'Ср. позиция', 'Ср. дн. частотность', 'Сум. частотность за 14 дн', 'Охват', 'Бренд']]
+result_df = result_df[['Поисковые запросы', 'Ср. позиция', 'Ср. дн. частотность', 'Сум. частотность за 14 дн', 'Ср. число кликов', 'Сум. кликов за 14 дн.', 'Охват', 'Бренд']]
 
 # Получаем название домена и текущую дату
 domain_name = input_file.split('.')[0]
@@ -80,17 +87,15 @@ with pd.ExcelWriter(output_file_name, engine='openpyxl') as writer:
 
     # Настройка ширины колонок
     writer.sheets['Семантическое ядро'].column_dimensions['A'].width = 50
-    for col in ['B', 'C', 'D', 'E', 'F']:
+    for col in ['B', 'C', 'D', 'E', 'F', 'G', 'H']:
         writer.sheets['Семантическое ядро'].column_dimensions[col].width = 25
 
-# Создание нового листа для статистики слов
-with pd.ExcelWriter(output_file_name, engine='openpyxl', mode='a') as writer:
+    # Создание нового листа для статистики слов
     word_count_df.to_excel(writer, index=False, sheet_name='Статистика слов')
 
     # Настройка ширины колонок в листе "Статистика слов"
     writer.sheets['Статистика слов'].column_dimensions['A'].width = 25
     writer.sheets['Статистика слов'].column_dimensions['B'].width = 25
-
 
     # Добавление листа с пояснениями
     explanations = [
@@ -99,7 +104,9 @@ with pd.ExcelWriter(output_file_name, engine='openpyxl', mode='a') as writer:
         "'Ср. дн. частотность': Среднедневная частотность запроса (округлено до целых)",
         "'Сум. частотность за 14 дн': Суммарная частотность запросов за две недели",
         "'Охват': Отношение показов к спросу в процентах (округлено до десятых)",
-        "'Бренд': Запросы с вхождением бренда"
+        "'Бренд': Запросы с вхождением бренда",
+        "'Ср. число кликов': Среднее число кликов в день",
+        "'Сум. кликов за 14 дн.': Суммарное число кликов за 14 дней"
     ]
     df_explanations = pd.DataFrame(explanations, columns=['Пояснение'])
     df_explanations.to_excel(writer, index=False, sheet_name='Пояснения')
