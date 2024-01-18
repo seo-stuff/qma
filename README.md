@@ -7,6 +7,8 @@
 
 ![Окно программы](demo.png)
 
+![Результаты](demo2.png)
+
 Видео с комментариями по работе скрипта - https://youtu.be/8B459Kf03hE  
   
 Потребуется установить Python с официального сайта - https://www.python.org/downloads/windows/  
