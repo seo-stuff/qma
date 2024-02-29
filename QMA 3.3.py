@@ -117,12 +117,14 @@ def main():
     # Вывод статистики и ожидание
     num_queries = len(result_df)
     processing_time = time.process_time()
+    print(f"\n***")
     print(f"Результат сохранен в файл {output_file_name}")
     if mode == 1:
-        print(f"\nОбработано поисковых запросов: {num_queries}")
+        print(f"Обработано поисковых запросов: {num_queries}")
     elif mode == 2:
-        print(f"\nОбработано адресов страниц: {num_queries}")
-    input("Нажмите Enter для завершения...")
+        print(f"Обработано адресов страниц: {num_queries}")
+    print(f"***")
+    input("\nНажмите Enter для завершения...")
 
 if __name__ == "__main__":
     main()
