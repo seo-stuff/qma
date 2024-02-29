@@ -59,8 +59,8 @@ def main():
         df.rename(columns={'Indicator': 'Поисковые запросы'}, inplace=True)
         df = add_word_count_column(df)
     elif mode == 2:
-        df.rename(columns={'Indicator': 'Адрес страницы'}, inplace=True)
-        df['Адрес страницы'] = site_url + df['Адрес страницы']
+        df.rename(columns={'Indicator': 'PATH'}, inplace=True)
+        df['Полный URL'] = site_url + df['PATH']
 
     # Обработка данных
     if mode == 1:
@@ -78,8 +78,8 @@ def main():
 
         # Фильтрация и сортировка данных
         min_total_frequency = 0  # Минимальная суммарная частотность для фильтрации НЧ запросов
-        result_df = df.loc[df['Сум. частотность за 14 дн'] >= min_total_frequency].sort_values(by='Сум. частотность за 14 дn', ascending=False)
-        result_df = result_df[['Поисковые запросы', 'Кол-во слов', 'Ср. позиция', 'Ср. дн. частотность', 'Сум. частотность за 14 дn', 'Ср. число кликов', 'Сум. кликов за 14 дn', 'Охват']]
+        result_df = df.loc[df['Сум. частотность за 14 дн'] >= min_total_frequency].sort_values(by='Сум. частотность за 14 дн', ascending=False)
+        result_df = result_df[['Поисковые запросы', 'Кол-во слов', 'Ср. позиция', 'Ср. дн. частотность', 'Сум. частотность за 14 дн', 'Ср. число кликов', 'Сум. кликов за 14 дн.', 'Охват']]
 
     elif mode == 2:
         shows_columns = [col for col in df.columns if col.endswith('_shows')]
@@ -92,7 +92,7 @@ def main():
         df['Ср. число кликов'] = df[clicks_columns].mean(axis=1).round(0)
         df['Сум. кликов за 14 дн.'] = df[clicks_columns].sum(axis=1)
 
-        result_df = df[['Адрес страницы', 'Ср. позиция', 'Ср. дн. показов', 'Сум. показов за 14 дн', 'Ср. число кликов', 'Сум. кликов за 14 дн.']]
+        result_df = df[['Полный URL', 'PATH', 'Ср. позиция', 'Ср. дн. показов', 'Сум. показов за 14 дн', 'Ср. число кликов', 'Сум. кликов за 14 дн.']]
 
     # Создание DataFrame для статистики слов (только для режима анализа поисковых запросов)
     if mode == 1:
