@@ -15,13 +15,12 @@ def add_word_count_column(df):
     df['Кол-во слов'] = df['Поисковые запросы'].apply(lambda x: len(x.split()))
     return df
 
-def create_output_file_name(input_file, mode):
-    domain_name = input_file.split('.')[0]
-    current_date_time = datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+def create_output_file_name(input_file, domain, mode):
+    current_date = datetime.now().strftime('%Y-%m-%d')
     if mode == 1:
-        return f"semantics-{current_date_time}.xlsx"
+        return f"{domain}-semantics-{current_date}.xlsx"
     elif mode == 2:
-        return f"pages-{current_date_time}.xlsx"
+        return f"{domain}-pages-{current_date}.xlsx"
     else:
         raise ValueError("Неверный режим анализа. Допустимые значения: 1 или 2.")
 
@@ -44,6 +43,7 @@ def main():
     
     # Указание адреса сайта
     site_url = input("Пожалуйста, введите адрес сайта в формате https://site.ru: ")
+    domain = site_url.split('//')[-1].split('/')[0]
 
     # Выбор режима анализа
     mode = int(input("Выберите режим анализа:\n[1] Анализ поисковых запросов\n[2] Анализ страниц\n"))
@@ -78,8 +78,8 @@ def main():
 
         # Фильтрация и сортировка данных
         min_total_frequency = 0  # Минимальная суммарная частотность для фильтрации НЧ запросов
-        result_df = df.loc[df['Сум. частотность за 14 дн'] >= min_total_frequency].sort_values(by='Сум. частотность за 14 дн', ascending=False)
-        result_df = result_df[['Поисковые запросы', 'Кол-во слов', 'Ср. позиция', 'Ср. дн. частотность', 'Сум. частотность за 14 дн', 'Ср. число кликов', 'Сум. кликов за 14 дн.', 'Охват']]
+        result_df = df.loc[df['Сум. частотность за 14 дн'] >= min_total_frequency].sort_values(by='Сум. частотность за 14 дn', ascending=False)
+        result_df = result_df[['Поисковые запросы', 'Кол-во слов', 'Ср. позиция', 'Ср. дн. частотность', 'Сум. частотность за 14 дn', 'Ср. число кликов', 'Сум. кликов за 14 дn', 'Охват']]
 
     elif mode == 2:
         shows_columns = [col for col in df.columns if col.endswith('_shows')]
@@ -100,7 +100,7 @@ def main():
         word_count_df = word_count_df.sort_values(by='Количество', ascending=False)
 
     # Создание имени выходного файла
-    output_file_name = create_output_file_name(input_file, mode)
+    output_file_name = create_output_file_name(input_file, domain, mode)
 
     # Сохранение файла Excel
     with pd.ExcelWriter(output_file_name, engine='openpyxl') as writer:
@@ -118,8 +118,10 @@ def main():
     num_queries = len(result_df)
     processing_time = time.process_time()
     print(f"Результат сохранен в файл {output_file_name}")
-    print(f"\nОбработано поисковых запросов: {num_queries}")
-    print(f"Время выполнения скрипта: {processing_time} секунд")
+    if mode == 1:
+        print(f"\nОбработано поисковых запросов: {num_queries}")
+    elif mode == 2:
+        print(f"\nОбработано адресов страниц: {num_queries}")
     input("Нажмите Enter для завершения...")
 
 if __name__ == "__main__":
