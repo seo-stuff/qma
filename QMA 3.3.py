@@ -7,7 +7,8 @@ import pyfiglet
 
 def load_data(file_path):
     if not os.path.exists(file_path):
-        print(f'Файл {file_path} не найден. Скачайте отчет и положите рядом со скриптом.')
+        print(f'Файл {file_path} не найден. Скачайте отчет из Яндекс.Вебмастера и положите рядом со скриптом файл с названием wm.xlsx.')
+        input("\nНажмите Enter для завершения...")
         return None
     return pd.read_excel(file_path)
 
